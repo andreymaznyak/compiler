@@ -467,51 +467,84 @@ public class PascalParser {
         return result;
     }
     
-    private boolean currentBlockMathLogicalOperations(String lastOperation){
+    private boolean currentTokenMathLogicalOperations(String lastOperation){
         boolean result = false;
         switch(parseTokenList.get(i).getText()){
             case "+":{
+                currentTokenEquals(nextTokenTRUE, "+", showErrorTRUE);
+                currentTokenIdetifier(nextTokenTRUE, useVariable, showErrorTRUE, "int,real");
                 break;
             }
             case "-":{
+                currentTokenEquals(nextTokenTRUE, "-", showErrorTRUE);
+                currentTokenIdetifier(nextTokenTRUE, useVariable, showErrorTRUE, "int,real");
                 break;
             }
             case "*":{
+                currentTokenEquals(nextTokenTRUE, "*", showErrorTRUE);
+                currentTokenIdetifier(nextTokenTRUE, useVariable, showErrorTRUE, "int");
                 break;
             }
             case "/":{
+                currentTokenEquals(nextTokenTRUE, "/", showErrorTRUE);
+                currentTokenIdetifier(nextTokenTRUE, useVariable, showErrorTRUE, "int");
                 break;
             }
             case ">":{
+                currentTokenEquals(nextTokenTRUE, ">", showErrorTRUE);
+                currentTokenIdetifier(nextTokenTRUE, useVariable, showErrorTRUE, "int");
                 break;
             }
             case ">=":{
+                currentTokenEquals(nextTokenTRUE, ">=", showErrorTRUE);
+                currentTokenIdetifier(nextTokenTRUE, useVariable, showErrorTRUE, "int");
                 break;
             }
             case "<":{
+                currentTokenEquals(nextTokenTRUE, "<", showErrorTRUE);
+                currentTokenIdetifier(nextTokenTRUE, useVariable, showErrorTRUE, "int");
                 break;
             }
             case "<=":{
+                currentTokenEquals(nextTokenTRUE, "<=", showErrorTRUE);
+                currentTokenIdetifier(nextTokenTRUE, useVariable, showErrorTRUE, "int");
                 break;
             }
             case "<>":{
+                currentTokenEquals(nextTokenTRUE, "<>", showErrorTRUE);
+                currentTokenIdetifier(nextTokenTRUE, useVariable, showErrorTRUE, "int");
                 break;
             }
             case "=":{
+                currentTokenEquals(nextTokenTRUE, "=", showErrorTRUE);
+                currentTokenIdetifier(nextTokenTRUE, useVariable, showErrorTRUE, "");
                 break;
             }
             case "or":{
+                currentTokenEquals(nextTokenTRUE, "or", showErrorTRUE);
+                currentTokenIdetifier(nextTokenTRUE, useVariable, showErrorTRUE, "boolean");
                 break;
             }
             case "and":{
+                currentTokenEquals(nextTokenTRUE, "and", showErrorTRUE);
+                currentTokenIdetifier(nextTokenTRUE, useVariable, showErrorTRUE, "boolean");
                 break;
             }
             case "not":{
+                currentTokenEquals(nextTokenTRUE, "not", showErrorTRUE);
+                currentTokenIdetifier(nextTokenTRUE, useVariable, showErrorTRUE, "boolean");
+                break;
+            }
+            case "(":{
+                break;
+            }
+            case ")":{
                 break;
             }
             default:{ //Первый символ скобка или идентификатор
                 
             }
+            currentTokenMathLogicalOperations(lastOperation);
         }
         return result;
     }
