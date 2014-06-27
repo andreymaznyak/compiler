@@ -142,7 +142,22 @@ public class PascalParser {
          result = currentTokenIdetifier(nextToken, status, showError, "");
          return result;
     }
-    
+    private String getTypeCurrentToken(int status){
+        String result = "";
+        String prefix = "";
+        if (status == 1 || status == 2 || status == 3) {
+            prefix = currentNameSpase;
+        } else if (status == 4) {
+            prefix = procedureNameSpase;
+            currentNameSpase = parseTokenList.get(i).getText();
+        }
+        String key = prefix.concat(parseTokenList.get(i).getText());
+        if (tableVariable.containsKey(key)){
+            TokenParser token = tableVariable.get(key);
+            result = token.getType();
+        };
+        return result;
+    }
     private boolean currentTokenIdetifier(boolean nextToken, int status, boolean showError, String type) {
         //Нужно дописать с учетом областей видимости получение списков уже объявленных идентификаторов
         boolean result = false;
@@ -409,7 +424,7 @@ public class PascalParser {
             }       
         return !error;
     }
-    
+    //Текущий блок объявления переменных
     private boolean currentBlockVar(boolean nextToken,int status ,boolean showError){
         boolean result = false;
         if(currentTokenEquals(nextTokenTRUE,"var")){
@@ -435,7 +450,7 @@ public class PascalParser {
         }
         return result;
     }
-    
+    //Текущий блок глобальных объявлений констант, перменных, процедур, главного блока программы 
     private boolean currentBlockGlobalDeclarations(boolean nextToken, boolean showError){
         boolean result = false;
         switch(parseTokenList.get(i).getText()){
@@ -468,7 +483,7 @@ public class PascalParser {
         }
         return result;
     }
-    
+    //Текущий блок описания локальных переменных или блок программы(Внутренности процедуры)
     private boolean currentBlockLocalDeclarations(boolean nextToken, boolean showError){
         boolean result = false;
         switch(parseTokenList.get(i).getText()){
@@ -489,7 +504,7 @@ public class PascalParser {
         }
         return result;
     }
-    
+    //Текущий блок описания процедуры
     private boolean currentBlockProcedure(String procedureName, int status, boolean showError){
         boolean result = false;
         currentTokenEquals(nextTokenTRUE, procedureName, showError);
@@ -600,6 +615,25 @@ public class PascalParser {
         currentTokenEquals(nextTokenTRUE, "(", showError);
         currentBlockComma(")", useVariable, showError);
         currentTokenEquals(nextTokenTRUE, ";", showError);
+        return result;
+    }
+    
+    private boolean currentBlockConditon(){
+        boolean result = false;
+        if(i < parseTokenList.size()){
+            switch(parseTokenList.get(i).getText()){
+                case("("):{
+                    currentTokenEquals(nextTokenTRUE, "(", showErrorTRUE);
+                    currentBlockConditon();
+                }
+                case("then"):{
+                    currentTokenEquals(nextTokenTRUE, "then", showErrorTRUE);
+                }
+                default:{
+                    currentTokenIdetifier(nextTokenTRUE, i, showErrorTRUE, globalNameSpase);
+                }
+            }
+        }
         return result;
     }
     
