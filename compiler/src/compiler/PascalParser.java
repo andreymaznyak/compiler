@@ -55,17 +55,29 @@ public class PascalParser {
         addMetaToken(new MetaTokenParser("for", "for", ""));
         addMetaToken(new MetaTokenParser("end", "}", ""));
         addMetaToken(new MetaTokenParser("var", "", ""));
-        addMetaToken(new MetaTokenParser("const", "#define", ""));
+        addMetaToken(new MetaTokenParser("const", "", ""));
         addMetaToken(new MetaTokenParser("else", "else", ""));
         addMetaToken(new MetaTokenParser("end.", "}", ""));
         addMetaToken(new MetaTokenParser("read", "cin <<", ""));
         addMetaToken(new MetaTokenParser("write", "cout >>", ""));
         addMetaToken(new MetaTokenParser("readln", "cin <<", ""));
         addMetaToken(new MetaTokenParser("writeln", "cout >>", ""));
-        addMetaToken(new MetaTokenParser("program", "void main", ""));
+        addMetaToken(new MetaTokenParser("program", "", ""));
+        addMetaToken(new MetaTokenParser("integer", "int ", ""));
         addMetaToken(new MetaTokenParser("to", "", ""));
         addMetaToken(new MetaTokenParser("do", "{", ""));
-        
+        addMetaToken(new MetaTokenParser("%variableblock%", "", ""));
+        addMetaToken(new MetaTokenParser("%constblock%", "", ""));
+        addMetaToken(new MetaTokenParser("%procedureblock%", "", ""));
+        addMetaToken(new MetaTokenParser("%mainblock%", "", ""));
+        addMetaToken(new MetaTokenParser("%constbodyblock%", "\n#define ", ""));
+        addMetaToken(new MetaTokenParser("%blockprogram%", "", ""));
+        addMetaToken(new MetaTokenParser("%blockglobaldeclarations%", "", ""));
+        addMetaToken(new MetaTokenParser("%globalblock%", "#include <iostream>\nusing namespace std;", ""));
+        addMetaToken(new MetaTokenParser("%varglobalblock%", "", ""));
+        addMetaToken(new MetaTokenParser("%prefixvariableblock%", "\n", ""));
+        addMetaToken(new MetaTokenParser("", "", ""));
+        addMetaToken(new MetaTokenParser("", "", ""));
         errorLog.setWiget(jTextError);
     }
     
@@ -326,7 +338,7 @@ public class PascalParser {
             //Пока не встретим вар или бегин или ошибку
             while(!currentTokenEquals("begin")&&!currentTokenEquals("procedure")&&!currentTokenEquals("var")&&!currentTokenEquals("counst") && !error ){
                 //Ожидаем идентификатор
-                addLeafBlock(currentList, "ConstBodyBlock");
+                addLeafBlock(currentList, "%ConstBodyBlock%");
                 error = !currentTokenIdetifier(nextTokenTRUE, counstIdentifer, showError); 
                 //Ожидаем равно
                 error = !currentTokenEquals(nextTokenTRUE, "=", showError);
@@ -438,7 +450,9 @@ public class PascalParser {
     private boolean currentBlockVar(boolean nextToken,int status ,boolean showError){
         boolean result = false;
         if(currentTokenEquals(nextTokenTRUE,"var")){
-            addLeafBlock("variableBlock");
+            Tree<TokenParser> currentLevel = currentList;
+            addLeafBlock( currentLevel,"%prefixvariableblock%" );
+            addLeafBlock( currentLevel,"%variableBlock%" );
             //Ожидаем идентификатор 
             currentTokenIdetifier(nextTokenTRUE,status,showError);
             //Пока не дойдём до : или не встретим ошибку
@@ -448,6 +462,8 @@ public class PascalParser {
             //Ожидаем точку с запятой
             currentTokenEquals(nextTokenTRUE, ";", showError);
             while(!currentTokenEquals("begin")&&!currentTokenEquals("procedure")&&!currentTokenEquals("var")&&!currentTokenEquals("counst")){
+                addLeafBlock( currentLevel,"%prefixvariableblock%" );
+                addLeafBlock( currentLevel,"%variableBlock%" );
                 //Ожидаем идектификатор файла
                 currentTokenIdetifier(nextTokenTRUE, status, showError);
                 //Пока не дойдём до : или не встретим ошибку
@@ -467,26 +483,26 @@ public class PascalParser {
         switch(parseTokenList.get(i).getText()){
             case "const":{
                 //Если видим блок описания констант counst identifer = 1; {identiferN = N}*
-                addLeafBlock( CurrentList, "ConstBlock");
+                addLeafBlock( CurrentList, "%ConstBlock%");
                 currentBlockCounst(nextToken,showError);
                 currentBlockGlobalDeclarations(nextToken, showError, CurrentList);
                 break;
             }
             case "var":{
-                addLeafBlock( CurrentList,"varGlobalBlock");
+                addLeafBlock( CurrentList,"%varGlobalBlock%");
                 currentBlockVar(nextToken, globalIdentifer, showError);
                 currentBlockGlobalDeclarations(nextToken, showError, CurrentList);
                 break;
             }
             case "procedure":{
-                addLeafBlock( CurrentList,"ProcedureBlock");
+                addLeafBlock( CurrentList,"%ProcedureBlock%");
                 currentBlockProcedure(nextToken,showError);
                 currentBlockGlobalDeclarations(nextToken, showError, CurrentList);
                 
                 break;
             }
             case "begin":{
-                addLeafBlock( CurrentList,"MainBlock");
+                addLeafBlock( CurrentList,"%MainBlock%");
                 currentNameSpase = globalNameSpase;
                 currentTokenEquals(nextToken, "begin", showError);
                 currentBlockBegin(nextToken, showError);
@@ -758,12 +774,12 @@ public class PascalParser {
     public String parse(ArrayList<TokenParser> ParseTokenList) {
         init(ParseTokenList);
         String result = "";
-        TokenParser blockProgram = new TokenParser( "root", BLOCK );
+        TokenParser blockProgram = new TokenParser( "%globalblock%", BLOCK );
         parseTree = new Tree<TokenParser>( blockProgram );
         currentList = parseTree;
-        addLeafBlock( "BlockProgram" );
+        addLeafBlock( "%BlockProgram%" );
         currentBlockProgram();
-        addLeafBlock( parseTree ,"BlockGlobalDeclarations" );
+        addLeafBlock( parseTree ,"%BlockGlobalDeclarations%" );
         currentBlockGlobalDeclarations(nextTokenTRUE, showErrorTRUE, currentList);
            
         CodeGenarator codeGenerator = new CodeGenarator(parseTree, tokenList);
