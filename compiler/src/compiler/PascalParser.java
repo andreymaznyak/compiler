@@ -85,7 +85,6 @@ public class PascalParser {
         }
         
         if(nextToken){
-            currentList.addLeaf(parseTokenList.get(i));
             nextToken();
         }
         return result;
@@ -95,7 +94,6 @@ public class PascalParser {
         boolean result = parseTokenList.get(i).toLowerCase().equals(regex);
         
         if(nextToken){
-            currentList.addLeaf(parseTokenList.get(i));
             nextToken();
         }
         return result;
@@ -109,6 +107,7 @@ public class PascalParser {
     private boolean currentTokenNumber(boolean nextToken){
         boolean result = isNumber(parseTokenList.get(i));
         if(nextToken){
+            
             nextToken();
         }
         return result;
@@ -149,6 +148,7 @@ public class PascalParser {
          result = currentTokenIdetifier(nextToken, status, showError, "");
          return result;
     }
+    
     private String getTypeCurrentToken(int status){
         String result = "";
         String prefix = "";
@@ -165,6 +165,7 @@ public class PascalParser {
         };
         return result;
     }
+    
     private boolean currentTokenIdetifier(boolean nextToken, int status, boolean showError, String type) {
         //Нужно дописать с учетом областей видимости получение списков уже объявленных идентификаторов
         boolean result = false;
@@ -323,7 +324,7 @@ public class PascalParser {
             //Пока не встретим вар или бегин или ошибку
             while(!currentTokenEquals("begin")&&!currentTokenEquals("procedure")&&!currentTokenEquals("var")&&!currentTokenEquals("counst") && !error ){
                 //Ожидаем идентификатор
-                
+                addLeafBlock(currentList, "ConstBodyBlock");
                 error = !currentTokenIdetifier(nextTokenTRUE, counstIdentifer, showError); 
                 //Ожидаем равно
                 error = !currentTokenEquals(nextTokenTRUE, "=", showError);
@@ -435,10 +436,11 @@ public class PascalParser {
     private boolean currentBlockVar(boolean nextToken,int status ,boolean showError){
         boolean result = false;
         if(currentTokenEquals(nextTokenTRUE,"var")){
-            //Ожидаем идектификатор 
+            addLeafBlock("variableBlock");
+            //Ожидаем идентификатор 
             currentTokenIdetifier(nextTokenTRUE,status,showError);
             //Пока не дойдём до : или не встретим ошибку
-            currentBlockComma(":", status, showError);
+            currentBlockComma(":", status, showError, nextTokenFALSE);
             //Ожидаем блок описания типов
             currentBlockType();
             //Ожидаем точку с запятой
@@ -458,27 +460,31 @@ public class PascalParser {
         return result;
     }
     //Текущий блок глобальных объявлений констант, перменных, процедур, главного блока программы 
-    private boolean currentBlockGlobalDeclarations(boolean nextToken, boolean showError){
+    private boolean currentBlockGlobalDeclarations(boolean nextToken, boolean showError, Tree<TokenParser> CurrentList){
         boolean result = false;
         switch(parseTokenList.get(i).getText()){
             case "const":{
                 //Если видим блок описания констант counst identifer = 1; {identiferN = N}*
+                addLeafBlock( CurrentList, "ConstBlock");
                 currentBlockCounst(nextToken,showError);
-                currentBlockGlobalDeclarations(nextToken, showError);
+                currentBlockGlobalDeclarations(nextToken, showError, CurrentList);
                 break;
             }
             case "var":{
+                addLeafBlock( CurrentList,"varGlobalBlock");
                 currentBlockVar(nextToken, globalIdentifer, showError);
-                currentBlockGlobalDeclarations(nextToken, showError);
+                currentBlockGlobalDeclarations(nextToken, showError, CurrentList);
                 break;
             }
             case "procedure":{
+                addLeafBlock( CurrentList,"ProcedureBlock");
                 currentBlockProcedure(nextToken,showError);
-                currentBlockGlobalDeclarations(nextToken, showError);
+                currentBlockGlobalDeclarations(nextToken, showError, CurrentList);
                 
                 break;
             }
             case "begin":{
+                addLeafBlock( CurrentList,"MainBlock");
                 currentNameSpase = globalNameSpase;
                 currentTokenEquals(nextToken, "begin", showError);
                 currentBlockBegin(nextToken, showError);
@@ -751,8 +757,8 @@ public class PascalParser {
         currentList = parseTree;
         addLeafBlock( "BlockProgram" );
         currentBlockProgram();
-        addLeafBlock( "BlockGlobalDeclarations" );
-        currentBlockGlobalDeclarations(nextTokenTRUE, showErrorTRUE);
+        addLeafBlock( parseTree ,"BlockGlobalDeclarations" );
+        currentBlockGlobalDeclarations(nextTokenTRUE, showErrorTRUE, currentList);
            
           
         
@@ -803,6 +809,7 @@ public class PascalParser {
     }
     
     private void nextToken(){
+        currentList.addLeaf(parseTokenList.get(i));
         i++;
     }
     
@@ -810,10 +817,22 @@ public class PascalParser {
         i--;
     }// </editor-fold>
     
-    private void addLeafBlock(String TextBlock){
-        TokenParser programDeclaration = new TokenParser( "BlockProgram" , BLOCK );
-        currentList = currentList.addLeaf(programDeclaration);
+    // <editor-fold defaultstate="collapsed" desc="Работа с деревом разбора">
+    //Добавляет в определенный узел дерева и изменяет currentList
+    private Tree<TokenParser> addLeafBlock(Tree<TokenParser> CurrentList, String TextBlock){
+        TokenParser programDeclaration = new TokenParser( TextBlock , BLOCK );
+        return currentList = CurrentList.addLeaf(programDeclaration);
     }
+    //
+    private void addLeafBlockToList(Tree<TokenParser> CurrentList, String TextBlock){
+        TokenParser programDeclaration = new TokenParser( TextBlock , BLOCK );
+        currentList = CurrentList.addLeaf(programDeclaration);
+    }
+    //Добавляет в текущий узел дерева
+    private void addLeafBlock(String TextBlock){
+        TokenParser programDeclaration = new TokenParser( TextBlock , BLOCK );
+        currentList = currentList.addLeaf(programDeclaration);
+    }// </editor-fold>
 }
 
 // <editor-fold defaultstate="collapsed" desc="Класс ошибок">

@@ -79,7 +79,7 @@ class TokenParser{
     
     public TokenParser(String Text, int Line, int Symbol) {
         text = Text;
-        line = Line;
+        line = Line + 1;
         symbol = Symbol;
         counst = false;
         list = false;
