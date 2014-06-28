@@ -75,12 +75,19 @@ class TokenParser{
     private boolean init;
     private boolean counst;
     private String value;
+    private boolean list;
     
     public TokenParser(String Text, int Line, int Symbol) {
         text = Text;
         line = Line;
         symbol = Symbol;
         counst = false;
+        list = false;
+    }
+    
+    public TokenParser(String Text, boolean List){
+        text = Text;
+        list = List;
     }
     
     public boolean equals(String string){
@@ -128,6 +135,9 @@ class TokenParser{
     }
     public String getValue(){
         return value;
+    }
+    public String toString(){
+        return text;
     }
 }
 

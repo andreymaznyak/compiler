@@ -6,6 +6,7 @@
 package compiler;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +28,8 @@ public class PascalParser {
     private static final boolean nextTokenTRUE = true;
     private static final boolean nextTokenFALSE = false;
     private static final boolean showErrorTRUE = true;
-    
+    private static final boolean BLOCK = true;
+
     private static final String globalNameSpase = "%global%";
     private static final String procedureNameSpase = "%procedure%";
     
@@ -38,7 +40,8 @@ public class PascalParser {
     private ArrayList<TokenParser> listOfNewVariable = new ArrayList<TokenParser>();
     private ArrayList<String> listOfReservedWords = new ArrayList<String>();
     private Map<String,TokenParser> tableVariable = new HashMap<String, TokenParser>();
-    
+    private Tree <TokenParser> parseTree = null;
+    private Tree <TokenParser> currentList = null;
     public ErrorLog errorLog = new ErrorLog( null );  // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Функции инициализации">
@@ -80,7 +83,9 @@ public class PascalParser {
         if(ShowError && !result){
             errorLog.add("Ожидается ".concat(regex),parseTokenList.get(i));
         }
+        
         if(nextToken){
+            currentList.addLeaf(parseTokenList.get(i));
             nextToken();
         }
         return result;
@@ -88,7 +93,9 @@ public class PascalParser {
     
     private boolean currentTokenEquals(boolean nextToken, String regex){
         boolean result = parseTokenList.get(i).toLowerCase().equals(regex);
+        
         if(nextToken){
+            currentList.addLeaf(parseTokenList.get(i));
             nextToken();
         }
         return result;
@@ -617,7 +624,7 @@ public class PascalParser {
         currentTokenEquals(nextTokenTRUE, ";", showError);
         return result;
     }
-    
+    //Текущий блок условие
     private boolean currentBlockConditon(){
         boolean result = false;
         if(i < parseTokenList.size()){
@@ -682,6 +689,7 @@ public class PascalParser {
         }
         return result;
     }
+    //Текущий блок процедура
     private boolean currentBlockProcedure(boolean nextToken, boolean showError){
         boolean result = false;
         if(currentTokenEquals(nextTokenTRUE, "procedure", showErrorTRUE)){
@@ -712,6 +720,7 @@ public class PascalParser {
         }
         return result;
     }
+    //Текущий блок объявление программы
     private boolean currentBlockProgram(){
         boolean error = false;
         
@@ -720,6 +729,7 @@ public class PascalParser {
             error = true;
             errorLog.add("Ожидается ключевое слово program", parseTokenList.get(i));
         }
+        
             
         //Ожидаем токен-идентификатор программы identifer
         if(! currentTokenIdetifier(nextTokenTRUE, showErrorTRUE) ){
@@ -736,11 +746,18 @@ public class PascalParser {
     public String parseNew(ArrayList<TokenParser> ParseTokenList) {
         init(ParseTokenList);
         String result = "";
+        TokenParser blockProgram = new TokenParser( "root", BLOCK );
+        parseTree = new Tree<TokenParser>( blockProgram );
+        currentList = parseTree;
+        addLeafBlock( "BlockProgram" );
         currentBlockProgram();
+        addLeafBlock( "BlockGlobalDeclarations" );
         currentBlockGlobalDeclarations(nextTokenTRUE, showErrorTRUE);
+           
+          
         
         result.concat(result);
-
+        System.out.println(parseTree.toString());
         return result;
 
     }
@@ -793,6 +810,10 @@ public class PascalParser {
         i--;
     }// </editor-fold>
     
+    private void addLeafBlock(String TextBlock){
+        TokenParser programDeclaration = new TokenParser( "BlockProgram" , BLOCK );
+        currentList = currentList.addLeaf(programDeclaration);
+    }
 }
 
 // <editor-fold defaultstate="collapsed" desc="Класс ошибок">
