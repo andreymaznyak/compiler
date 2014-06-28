@@ -263,6 +263,10 @@ public class MainMenu extends javax.swing.JFrame {
                 tokenList.remove(i + 1);
                 tokenListSize--;
             }
+            if(tokenList.get(i).equals("end") && tokenList.get(i + 1).equals(".")){
+               tokenList.set(i, tokenList.get(i).concat("."));
+               tokenList.remove(i + 1);
+            }
         }
 
         for (TokenParser token : tokenList) {
@@ -271,7 +275,7 @@ public class MainMenu extends javax.swing.JFrame {
 
         PascalParser parser = new PascalParser( jTextAreaError );
 
-        text = parser.parseNew(tokenList);
+        text = parser.parse(tokenList);
 
         jTextC.setText(text);
 

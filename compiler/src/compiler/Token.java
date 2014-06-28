@@ -100,6 +100,10 @@ class TokenParser{
         text = text.concat(getText());
         return this;
     }
+    public TokenParser concat(String string){
+        text = text.concat(string);
+        return this;
+    }
     public String toLowerCase(){
         return text.toLowerCase();
     }
@@ -138,6 +142,12 @@ class TokenParser{
     }
     public String toString(){
         return text;
+    }
+    public void setText(String Text){
+        text = Text;
+    }
+    public boolean isBlock(){
+        return list;
     }
 }
 

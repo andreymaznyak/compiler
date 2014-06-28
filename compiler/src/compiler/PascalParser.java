@@ -54,6 +54,8 @@ public class PascalParser {
         addMetaToken(new MetaTokenParser("if", "if", ""));
         addMetaToken(new MetaTokenParser("for", "for", ""));
         addMetaToken(new MetaTokenParser("end", "}", ""));
+        addMetaToken(new MetaTokenParser("var", "", ""));
+        addMetaToken(new MetaTokenParser("const", "#define", ""));
         addMetaToken(new MetaTokenParser("else", "else", ""));
         addMetaToken(new MetaTokenParser("end.", "}", ""));
         addMetaToken(new MetaTokenParser("read", "cin <<", ""));
@@ -690,6 +692,10 @@ public class PascalParser {
                 currentTokenMathLogicalOperations(null);
                 break;
             }
+            case "end.":{
+                currentTokenEquals(nextTokenTRUE, "end.", showError);
+                break;
+            }
             
             //ЕЩЁ может быть идентификатор 
         }
@@ -749,7 +755,7 @@ public class PascalParser {
     // </editor-fold>
     
     // <editor-fold defaultstate="collapsed" desc="Служебные функции">
-    public String parseNew(ArrayList<TokenParser> ParseTokenList) {
+    public String parse(ArrayList<TokenParser> ParseTokenList) {
         init(ParseTokenList);
         String result = "";
         TokenParser blockProgram = new TokenParser( "root", BLOCK );
@@ -760,52 +766,12 @@ public class PascalParser {
         addLeafBlock( parseTree ,"BlockGlobalDeclarations" );
         currentBlockGlobalDeclarations(nextTokenTRUE, showErrorTRUE, currentList);
            
-          
-        
-        result.concat(result);
-        System.out.println(parseTree.toString());
+        CodeGenarator codeGenerator = new CodeGenarator(parseTree, tokenList);
+
+        result = result.concat(codeGenerator.getCText());
+        //System.out.println(parseTree.toString());
         return result;
 
-    }
-    
-    public String parse(ArrayList<TokenParser> parseTokenList) {
-        String result = "";
-
-        for (TokenParser token : parseTokenList) {
-
-            MetaTokenParser metaToken = findToken(token.getText());
-            if (metaToken != null) {
-                result = result.concat(metaToken.getSyntaxC());
-                if (metaToken.getSyntaxC().equals("{") || metaToken.getSyntaxC().equals("}")) {
-                    result = result.concat("\n");
-                } else {
-                    result = result.concat(" ");
-                }
-            } else {
-                result = result.concat(token.getText());
-                if (token.equals(";")) {
-                    result = result.concat("\n");
-                } else {
-                    result = result.concat(" ");
-                }
-            }
-        }
-        result.concat(result);
-
-        return result;
-
-    }
-    
-    private MetaTokenParser findToken(String token) {
-        MetaTokenParser result = null;
-        for (MetaTokenParser metaToken : tokenList) {
-            if (token != null) {
-                if (metaToken.getSyntaxPascal().equals(token)) {
-                    result = metaToken;
-                }
-            }
-        }
-        return result;
     }
     
     private void nextToken(){
