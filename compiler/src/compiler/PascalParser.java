@@ -53,15 +53,15 @@ public class PascalParser {
         addMetaToken(new MetaTokenParser("begin", "{\n", ""));
         addMetaToken(new MetaTokenParser("if", "if(", ""));
         addMetaToken(new MetaTokenParser("for", "for", ""));
-        addMetaToken(new MetaTokenParser("end", "\n}", ""));
+        addMetaToken(new MetaTokenParser("end", "}", ""));
         addMetaToken(new MetaTokenParser("var", "", ""));
         addMetaToken(new MetaTokenParser("const", "", ""));
         addMetaToken(new MetaTokenParser("else", "\nelse\n", ""));
-        addMetaToken(new MetaTokenParser("end.", "\n}", ""));
-        addMetaToken(new MetaTokenParser("read", "cin >>", ""));
-        addMetaToken(new MetaTokenParser("write", "cout <<", ""));
-        addMetaToken(new MetaTokenParser("readln", "cin >>", ""));
-        addMetaToken(new MetaTokenParser("writeln", "cout <<", ""));
+        addMetaToken(new MetaTokenParser("end.", "}", ""));
+        addMetaToken(new MetaTokenParser("read", "cin >> ", ""));
+        addMetaToken(new MetaTokenParser("write", "cout << ", ""));
+        addMetaToken(new MetaTokenParser("readln", "cin >> ", ""));
+        addMetaToken(new MetaTokenParser("writeln", "cout << ", ""));
         addMetaToken(new MetaTokenParser("program", "", ""));
         addMetaToken(new MetaTokenParser("integer", "int ", ""));
         addMetaToken(new MetaTokenParser("to", "", ""));
@@ -81,8 +81,8 @@ public class PascalParser {
         addMetaToken(new MetaTokenParser("(", "", ""));
         addMetaToken(new MetaTokenParser(")", "", ""));
         addMetaToken(new MetaTokenParser("'", "\"", ""));
+        addMetaToken(new MetaTokenParser(";", ";\n", ""));
         addMetaToken(new MetaTokenParser("", "", ""));
-        
         errorLog.setWiget(jTextError);
     }
     
@@ -192,16 +192,18 @@ public class PascalParser {
         boolean result = false;
         if (isNumber(parseTokenList.get(i).getText())){
             result = true;
+        }else if(parseTokenList.get(i).getTypeConst().equals("string")){
+            result = true;
         }
         return result;
     }
-    private boolean currentTokenIdetifierOrConst(boolean nextToken, int status, boolean showError, String type){
+    private boolean currentTokenIdetifierOrConst(boolean nextToken, int status, boolean showError, String CurrentType){
         boolean result = false;
         if(currentTokenConst()){
             nextToken();
         }
         else{
-            
+            currentTokenIdetifier(nextTokenTRUE, useVariable, showErrorTRUE, CurrentType);
         }
         return result;
     }
@@ -209,6 +211,7 @@ public class PascalParser {
         //Нужно дописать с учетом областей видимости получение списков уже объявленных идентификаторов
         boolean result = false;
         String prefix = "";
+        
         if (status < useVariable) { //Объявление идентификатора
             if (status == 1 || status == 2 || status == 3) {
                 prefix = currentNameSpase;
@@ -695,7 +698,7 @@ public class PascalParser {
                 }
                 default:{
                     CurrentType = getTypeCurrentToken(useVariable);
-                    currentTokenIdetifier(nextTokenTRUE, useVariable, showErrorTRUE, CurrentType);
+                    currentTokenIdetifierOrConst(nextTokenTRUE, useVariable, showErrorTRUE, CurrentType);
                     currentTokenMathLogicalOperations(CurrentType);
                     currentBlockConditon(CurrentType);
                 }
@@ -703,7 +706,32 @@ public class PascalParser {
         }
         return result;
     }
-    
+    //Текущий блок выражение
+    private boolean currentBlockExpression(String CurrentType){
+        boolean result = false;
+        if(i < parseTokenList.size()){
+            switch(parseTokenList.get(i).getText()){
+                case("("):{
+                    currentTokenEquals(nextTokenTRUE, "(", showErrorTRUE);
+                    CurrentType = getTypeCurrentToken(useVariable);
+                    currentBlockExpression(CurrentType);
+                    currentTokenEquals(nextTokenTRUE, ")", showErrorTRUE);
+                    break;
+                }
+                case(";"):{
+                    currentTokenEquals(nextTokenTRUE, ";", showErrorTRUE);
+                    break;
+                }
+                default:{
+                    CurrentType = getTypeCurrentToken(useVariable);
+                    currentTokenIdetifierOrConst(nextTokenTRUE, useVariable, showErrorTRUE, CurrentType);
+                    currentTokenMathLogicalOperations(CurrentType);
+                    currentBlockExpression(CurrentType);
+                }
+            }
+        }
+        return result;
+    }
     private boolean currentBlockIf(){
         boolean result = false;
         addLeafBlock("%OperatorIf%");
@@ -772,9 +800,10 @@ public class PascalParser {
                 currentTokenEquals(nextToken, "else", showError);
             }
             default:{
-                currentTokenIdetifier(nextToken, initVariable, showError, globalNameSpase);
+                String type = getTypeCurrentToken(useVariable);
+                currentTokenIdetifier(nextToken, initVariable, showError, type);
                 currentTokenEquals(nextToken, ":=", showError);
-                
+                currentBlockExpression(type);
             }
             //ЕЩЁ может быть идентификатор при присваивании
         }
@@ -793,10 +822,13 @@ public class PascalParser {
         }
         switch(parseTokenList.get(i).getText()){
             case "end":{
-               currentTokenEquals(nextToken, "end", showError); 
+               currentTokenEquals(nextToken, "end", showError);
+                currentTokenEquals(nextToken, ";", showError);
+               break;
             }
             case "end.":{
                currentTokenEquals(nextToken, "end.", showError);
+               break;
             }
         }    
         //ЕЩЁ может быть идентификатор 

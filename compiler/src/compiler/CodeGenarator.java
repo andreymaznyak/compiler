@@ -84,7 +84,7 @@ public class CodeGenarator {
                         }
                         case "%mainblock%":{
                             for(Tree<TokenParser> childOfChildofChild : childOfChild.getSubTrees()) {
-                                childOfChildofChild.getHead().setText("\nvoid main()\n{\n");
+                                childOfChildofChild.getHead().setText("void main()\n{\n");
                                 clearNextToken(parseTree, "end");
                                 break;
                             }
