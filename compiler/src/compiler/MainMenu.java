@@ -130,7 +130,7 @@ public class MainMenu extends javax.swing.JFrame {
             }
         });
 
-        jButtonImportPascal.setFont(jButtonImportPascal.getFont());
+        jButtonImportPascal.setFont(jButtonImportPascal.getFont().deriveFont(jButtonImportPascal.getFont().getSize()-1f));
         jButtonImportPascal.setText("Импортировать код \"Pascal\" из файла");
         jButtonImportPascal.setToolTipText("");
         jButtonImportPascal.setAutoscrolls(true);
@@ -143,7 +143,7 @@ public class MainMenu extends javax.swing.JFrame {
             }
         });
 
-        jButtonExportC.setText("Экспортировать код \"С\" в фаил");
+        jButtonExportC.setText("Экспортировать код \"С\" в файл");
         jButtonExportC.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonExportCActionPerformed(evt);
@@ -231,44 +231,10 @@ public class MainMenu extends javax.swing.JFrame {
         String text = jTextPascal.getText();
         //Убираем лишние пробелы
         text.trim();
-        ArrayList<TokenParser> tokenList = new ArrayList<TokenParser>();
-
-        StringTokenizer strTokenizer = new StringTokenizer(text, " \t\n\r\f(),.\'\"[]=+:*/;-", true);
-        int count = strTokenizer.countTokens();
-        int j = 0; //Номер символа символа
-        int k = 0; //Номер строки
-        for (int i = 0; i < count; i++) {
-            String token = strTokenizer.nextToken();
-
-            if (!token.equals(" ") && !token.equals("\t") && !token.equals("\n") && !token.equals("\r") && !token.equals("\f")) {
-                // System.out.println(token);
-                text.lastIndexOf(text);
-                tokenList.add(new TokenParser(token.trim(), k, j));
-                j += token.length();
-            } else {
-                if (token.equals("\n")) {
-                    j = 0;
-                    k++;
-                } else {
-                    j += token.length();
-                }
-
-            }
-        }
-        int tokenListSize = tokenList.size() - 1;
-        for (int i = 0; i < tokenListSize; i++) {
-            if (tokenList.get(i).equals(":") && tokenList.get(i + 1).equals("=")
-                    || tokenList.get(i).equals(".") && tokenList.get(i + 1).equals(".")) {
-                tokenList.set(i, tokenList.get(i).concat(tokenList.get(i + 1)));
-                tokenList.remove(i + 1);
-                tokenListSize--;
-            }
-            if(tokenList.get(i).equals("end") && tokenList.get(i + 1).equals(".")){
-               tokenList.set(i, tokenList.get(i).concat("."));
-               tokenList.remove(i + 1);
-            }
-        }
-
+        
+        LexicalAnalyzer lexAnalyzer = new LexicalAnalyzer();
+        ArrayList<TokenParser> tokenList = lexAnalyzer.Parse(text);
+        
         for (TokenParser token : tokenList) {
             System.out.println(token.getText());
         }
@@ -278,7 +244,6 @@ public class MainMenu extends javax.swing.JFrame {
         text = parser.parse(tokenList);
 
         jTextC.setText(text);
-
     }//GEN-LAST:event_TranslateActionPerformed
 
     private void jButtonImportPascalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonImportPascalActionPerformed
@@ -298,7 +263,6 @@ public class MainMenu extends javax.swing.JFrame {
 
     private void fileChooserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileChooserActionPerformed
         // TODO add your handling code here:
-
         int returnVal = fileChooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
@@ -321,7 +285,6 @@ public class MainMenu extends javax.swing.JFrame {
 
     private void fileChooserSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileChooserSaveActionPerformed
         // TODO add your handling code here:
-
         if (fileChooserSave.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
             try (FileWriter fw = new FileWriter(fileChooserSave.getSelectedFile())) {
                 fw.write(jTextC.getText());

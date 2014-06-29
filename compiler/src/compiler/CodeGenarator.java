@@ -7,6 +7,8 @@
 package compiler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  *
@@ -21,14 +23,14 @@ public class CodeGenarator {
     private String traversalOfTheTree(Tree<TokenParser> list){
         String result = "";
         String currentText = "";
-        if(list.getHead().isBlock()){
-            currentText = " ";
-        }else{
+//        if(list.getHead().isBlock()){
+//            currentText = "";
+//        }else{
             currentText = list.getHead().getText();
-        }
+//        }
         
         String translate = translateToken(currentText);
-        if(translate.equals("")){
+        if(translate.equals("%")){
             result = result.concat(currentText);
         }else{
             result = result.concat(translate);
@@ -41,11 +43,11 @@ public class CodeGenarator {
     }
     
     private String translateToken(String token) {
-        String result = "";
+        String result = "%";
         MetaTokenParser metaFindToken = null;
         for (MetaTokenParser metaToken : tokenList) {
             if (token != null) {
-                if (metaToken.getSyntaxPascal().equals(token)) {
+                if (metaToken.getSyntaxPascal().toLowerCase().equals(token.toLowerCase())) {
                     metaFindToken = metaToken;
                     result = metaFindToken.getSyntaxC();
                 }
@@ -61,26 +63,27 @@ public class CodeGenarator {
     }
     
     public String getCText(){
-        
+        System.out.println(parseTree.toString());
         CText = "";
         //Первоначально меняем некоторые синтаксические конструкции
         for (Tree<TokenParser> child : parseTree.getSubTrees()) {
-            if(child.getHead().equals("BlockProgram")){
+            if(child.getHead().equals("%BlockProgram%")){
                 clearAllChildrens( child );
             }else{
                  for(Tree<TokenParser> childOfChild : child.getSubTrees()) {
                     switch(childOfChild.getHead().getText()){
-                        case "constblock":{
+                        case "%constblock%":{
                             shiftChildrens(childOfChild,"="," ");
                             break;
                         }
-                        case "var":{
-                            //clearChildrens(childOfChild,"var");
+                        case "%varglobalblock%":{
+                            clearChildrens(childOfChild, ":");
+                            shiftPositionsToCurrent(childOfChild, "%variableblock%");
                             break;
                         }
-                        case "mainblock":{
+                        case "%mainblock%":{
                             for(Tree<TokenParser> childOfChildofChild : childOfChild.getSubTrees()) {
-                                childOfChildofChild.getHead().setText("void main(){\n");
+                                childOfChildofChild.getHead().setText("\nvoid main(){\n");
                                 break;
                             }
                             break;
@@ -93,6 +96,23 @@ public class CodeGenarator {
         //Затем обходим дерево в глубину
         
         return CText;
+    }
+    private void shiftPositionsToCurrent(Tree<TokenParser> list, String HeadTokenName){
+        if(list.getHead().getText().equals(HeadTokenName)){
+            Object[] iterator =  list.getSubTrees().toArray();
+            Tree<TokenParser> conditionToken = (Tree<TokenParser>) iterator[iterator.length-3];
+            
+            Tree<TokenParser> listToken = (Tree<TokenParser>) iterator[iterator.length-2];
+            if(conditionToken.getHead().getText().equals("of")){
+                list.getHead().setText(listToken.getHead().getText());
+            }else
+                list.getHead().setText(listToken.getHead().getText());
+            listToken.getHead().setText("");
+            
+        }
+        for (Tree<TokenParser> child : list.getSubTrees()) {
+            shiftPositionsToCurrent( child , HeadTokenName );
+        }
     }
     private void shiftChildrens(Tree<TokenParser> list, String Condition, String NewText){
         if(list.getHead().getText().equals(Condition)){
@@ -118,31 +138,4 @@ public class CodeGenarator {
             clearAllChildrens( child );
         }
     }
-//    public String parse(ArrayList<TokenParser> parseTokenList) {
-//        String result = "";
-//
-//        for (TokenParser token : parseTokenList) {
-//
-//            MetaTokenParser metaToken = findToken(token.getText());
-//            if (metaToken != null) {
-//                result = result.concat(metaToken.getSyntaxC());
-//                if (metaToken.getSyntaxC().equals("{") || metaToken.getSyntaxC().equals("}")) {
-//                    result = result.concat("\n");
-//                } else {
-//                    result = result.concat(" ");
-//                }
-//            } else {
-//                result = result.concat(token.getText());
-//                if (token.equals(";")) {
-//                    result = result.concat("\n");
-//                } else {
-//                    result = result.concat(" ");
-//                }
-//            }
-//        }
-//        result.concat(result);
-//
-//        return result;
-//
-//    }
 }
