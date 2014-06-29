@@ -100,9 +100,15 @@ public class CodeGenarator {
     private void shiftPositionsToCurrent(Tree<TokenParser> list, String HeadTokenName){
         if(list.getHead().getText().equals(HeadTokenName)){
             Object[] iterator =  list.getSubTrees().toArray();
+            Tree<TokenParser> conditionToken = (Tree<TokenParser>) iterator[iterator.length-3];
+            
             Tree<TokenParser> listToken = (Tree<TokenParser>) iterator[iterator.length-2];
-            list.getHead().setText(listToken.getHead().getText());
+            if(conditionToken.getHead().getText().equals("of")){
+                list.getHead().setText(listToken.getHead().getText());
+            }else
+                list.getHead().setText(listToken.getHead().getText());
             listToken.getHead().setText("");
+            
         }
         for (Tree<TokenParser> child : list.getSubTrees()) {
             shiftPositionsToCurrent( child , HeadTokenName );
