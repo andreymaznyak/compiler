@@ -76,6 +76,7 @@ class TokenParser{
     private boolean counst;
     private String value;
     private boolean list;
+    private String typeString;
     
     public TokenParser(String Text, int Line, int Symbol) {
         text = Text;
@@ -119,8 +120,14 @@ class TokenParser{
     public String getType(){
         return type;
     }
+    public String getTypeString(){
+        return typeString;
+    }
     public void setType(String Type){
         type = Type;
+    }
+    public void setTypeString(String TypeString){
+        typeString = TypeString;
     }
     public boolean getInit(){
         return init;

@@ -68,6 +68,7 @@ public class LexicalAnalyzer {
                 }
             }
         }
+        
         return tokenList;
     }
     
