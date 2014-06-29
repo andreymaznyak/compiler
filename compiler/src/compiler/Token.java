@@ -97,7 +97,7 @@ class TokenParser{
         return text.concat(string);
     }*/
     public TokenParser concat(TokenParser string){
-        text = text.concat(getText());
+        text = text.concat(string.getText());
         return this;
     }
     public TokenParser concat(String string){

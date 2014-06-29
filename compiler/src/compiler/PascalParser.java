@@ -231,7 +231,7 @@ public class PascalParser {
                     }
                 }
             } else {
-                if (showError) {
+                if (showError && !isNumber(parseTokenList.get(i).getText())) {
                     errorLog.add("Ожидается идентификатор\n", parseTokenList.get(i));
                 }
             }
@@ -566,6 +566,7 @@ public class PascalParser {
         currentTokenEquals(nextTokenTRUE, "(", showError);
         currentTokenIdetifier(nextTokenTRUE, otherIdentifer,  showError);
         currentBlockComma(")", status, showError);
+        currentTokenEquals(nextTokenTRUE, ";", showError);
         return result;
     }
 
@@ -760,6 +761,9 @@ public class PascalParser {
             case "end":{
                 break;
             }
+            case ";":{
+                currentTokenEquals(nextToken, ";", showError);
+            }
             //ЕЩЁ может быть идентификатор при присваивании
         }
         return result;
@@ -770,7 +774,6 @@ public class PascalParser {
         currentTokenEquals(nextToken, "begin", showError);
         while(!parseTokenList.get(i).getText().equals("end")&&!parseTokenList.get(i).getText().equals("end.")){
             currentBlockOperator(nextToken, showError);
-//            currentTokenEquals(nextToken, ";", showError);
         }
         switch(parseTokenList.get(i).getText()){
             case "end":{
@@ -807,6 +810,7 @@ public class PascalParser {
                 //Ожидаем блок описания типов
                 error = !currentBlockType();
                 //Ожидаем точку с запятой
+                
             }
             nextToken();
             currentTokenEquals(nextToken, ";", showError);

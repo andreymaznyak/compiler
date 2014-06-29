@@ -138,31 +138,4 @@ public class CodeGenarator {
             clearAllChildrens( child );
         }
     }
-//    public String parse(ArrayList<TokenParser> parseTokenList) {
-//        String result = "";
-//
-//        for (TokenParser token : parseTokenList) {
-//
-//            MetaTokenParser metaToken = findToken(token.getText());
-//            if (metaToken != null) {
-//                result = result.concat(metaToken.getSyntaxC());
-//                if (metaToken.getSyntaxC().equals("{") || metaToken.getSyntaxC().equals("}")) {
-//                    result = result.concat("\n");
-//                } else {
-//                    result = result.concat(" ");
-//                }
-//            } else {
-//                result = result.concat(token.getText());
-//                if (token.equals(";")) {
-//                    result = result.concat("\n");
-//                } else {
-//                    result = result.concat(" ");
-//                }
-//            }
-//        }
-//        result.concat(result);
-//
-//        return result;
-//
-//    }
 }
