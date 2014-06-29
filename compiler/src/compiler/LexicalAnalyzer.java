@@ -66,6 +66,7 @@ public class LexicalAnalyzer {
                     tokenList.get(n).setTypeString("String");
                     tokenList.remove(n + 1);
                     tokenListSize--;
+                    
                 }
             }
         }
