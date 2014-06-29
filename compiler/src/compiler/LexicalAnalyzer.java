@@ -51,6 +51,22 @@ public class LexicalAnalyzer {
                tokenList.set(i, tokenList.get(i).concat("."));
                tokenList.remove(i + 1);
             }
+            if (tokenList.get(i).equals("'")) {
+                int n = i;
+                while (!(n + 1 >= tokenListSize) && !tokenList.get(n + 1).equals("'")) {
+                    tokenList.set(n, tokenList.get(n).concat(tokenList.get(n + 1)));
+                    tokenList.remove(n + 1);
+                    tokenListSize--;
+                }
+                if (n + 1 == tokenListSize) {
+                    return null;
+                }
+                if (tokenList.get(n + 1).equals("'")) {
+                    tokenList.set(n, tokenList.get(n).concat(tokenList.get(n + 1)));
+                    tokenList.remove(n + 1);
+                    tokenListSize--;
+                }
+            }
         }
         return tokenList;
     }
