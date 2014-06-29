@@ -17,7 +17,7 @@ public class LexicalAnalyzer {
     
     public ArrayList<TokenParser> Parse(String text){
         ArrayList<TokenParser> tokenList = new ArrayList<TokenParser>();
-        StringTokenizer strTokenizer = new StringTokenizer(text, " \t\n\r\f(),.\'\"[]=+:*/;-", true);
+        StringTokenizer strTokenizer = new StringTokenizer(text, " \t\n\r\f(),.\'\"[]=+:*/;-<>", true);
         int count = strTokenizer.countTokens();
         int j = 0; //Номер символа символа
         int k = 0; //Номер строки
@@ -42,7 +42,10 @@ public class LexicalAnalyzer {
         int tokenListSize = tokenList.size() - 1;
         for (int i = 0; i < tokenListSize; i++) {
             if (tokenList.get(i).equals(":") && tokenList.get(i + 1).equals("=")
-                    || tokenList.get(i).equals(".") && tokenList.get(i + 1).equals(".")) {
+                    || tokenList.get(i).equals(".") && tokenList.get(i + 1).equals(".")
+                    || tokenList.get(i).equals(">") && tokenList.get(i + 1).equals("=")
+                    || tokenList.get(i).equals("<") && tokenList.get(i + 1).equals("=")
+                    || tokenList.get(i).equals("<") && tokenList.get(i + 1).equals(">")) {
                 tokenList.set(i, tokenList.get(i).concat(tokenList.get(i + 1)));
                 tokenList.remove(i + 1);
                 tokenListSize--;
@@ -63,6 +66,7 @@ public class LexicalAnalyzer {
                 }
                 if (tokenList.get(n + 1).equals("'")) {
                     tokenList.set(n, tokenList.get(n).concat(tokenList.get(n + 1)));
+                    tokenList.get(n).setText(tokenList.get(n).getText().replaceAll("'", "\""));
                     tokenList.get(n).setTypeConst("string");
                     tokenList.remove(n + 1);
                     tokenListSize--;

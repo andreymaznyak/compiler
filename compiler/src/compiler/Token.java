@@ -84,6 +84,7 @@ class TokenParser{
         symbol = Symbol;
         counst = false;
         list = false;
+        typeConst = "";
     }
     
     public TokenParser(String Text, boolean List){
