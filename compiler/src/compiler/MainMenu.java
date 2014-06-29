@@ -242,6 +242,9 @@ public class MainMenu extends javax.swing.JFrame {
         PascalParser parser = new PascalParser( jTextAreaError );
 
         text = parser.parse(tokenList);
+        
+        Formater formater = new Formater();
+        text = formater.format(text);
 
         jTextC.setText(text);
     }//GEN-LAST:event_TranslateActionPerformed
