@@ -63,6 +63,7 @@ public class LexicalAnalyzer {
                 }
                 if (tokenList.get(n + 1).equals("'")) {
                     tokenList.set(n, tokenList.get(n).concat(tokenList.get(n + 1)));
+                    tokenList.get(n).setTypeString("String");
                     tokenList.remove(n + 1);
                     tokenListSize--;
                 }
