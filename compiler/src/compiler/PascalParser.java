@@ -47,10 +47,10 @@ public class PascalParser {
     // <editor-fold defaultstate="collapsed" desc="Функции инициализации">
     public PascalParser( javax.swing.JTextArea jTextError ) {
 
-        addMetaToken(new MetaTokenParser(":=", "=", ""));
-        addMetaToken(new MetaTokenParser("=", "==", ""));
+        addMetaToken(new MetaTokenParser(":=", " = ", ""));
+        addMetaToken(new MetaTokenParser("=", " == ", ""));
         addMetaToken(new MetaTokenParser("then", ")\n", ""));
-        addMetaToken(new MetaTokenParser("begin", "{", ""));
+        addMetaToken(new MetaTokenParser("begin", "{\n", ""));
         addMetaToken(new MetaTokenParser("if", "if(", ""));
         addMetaToken(new MetaTokenParser("for", "for", ""));
         addMetaToken(new MetaTokenParser("end", "\n}", ""));
@@ -58,10 +58,10 @@ public class PascalParser {
         addMetaToken(new MetaTokenParser("const", "", ""));
         addMetaToken(new MetaTokenParser("else", "\nelse\n", ""));
         addMetaToken(new MetaTokenParser("end.", "\n}", ""));
-        addMetaToken(new MetaTokenParser("read", "cin <<", ""));
-        addMetaToken(new MetaTokenParser("write", "cout >>", ""));
-        addMetaToken(new MetaTokenParser("readln", "cin <<", ""));
-        addMetaToken(new MetaTokenParser("writeln", "cout >>", ""));
+        addMetaToken(new MetaTokenParser("read", "cin >>", ""));
+        addMetaToken(new MetaTokenParser("write", "cout <<", ""));
+        addMetaToken(new MetaTokenParser("readln", "cin >>", ""));
+        addMetaToken(new MetaTokenParser("writeln", "cout <<", ""));
         addMetaToken(new MetaTokenParser("program", "", ""));
         addMetaToken(new MetaTokenParser("integer", "int ", ""));
         addMetaToken(new MetaTokenParser("to", "", ""));
@@ -78,7 +78,11 @@ public class PascalParser {
         addMetaToken(new MetaTokenParser("%varglobalblock%", "", ""));
         addMetaToken(new MetaTokenParser("%prefixvariableblock%", "\n", ""));
         addMetaToken(new MetaTokenParser("%OperatorIf%", "", ""));
+        addMetaToken(new MetaTokenParser("(", "", ""));
+        addMetaToken(new MetaTokenParser(")", "", ""));
+        addMetaToken(new MetaTokenParser("'", "\"", ""));
         addMetaToken(new MetaTokenParser("", "", ""));
+        
         errorLog.setWiget(jTextError);
     }
     
@@ -764,6 +768,14 @@ public class PascalParser {
             case ";":{
                 currentTokenEquals(nextToken, ";", showError);
             }
+            case "else":{
+                currentTokenEquals(nextToken, "else", showError);
+            }
+            default:{
+                currentTokenIdetifier(nextToken, initVariable, showError, globalNameSpase);
+                currentTokenEquals(nextToken, ":=", showError);
+                
+            }
             //ЕЩЁ может быть идентификатор при присваивании
         }
         return result;
@@ -772,8 +784,12 @@ public class PascalParser {
     private boolean currentBlockBegin(boolean nextToken, boolean showError){
         boolean result = false;
         currentTokenEquals(nextToken, "begin", showError);
-        while(!parseTokenList.get(i).getText().equals("end")&&!parseTokenList.get(i).getText().equals("end.")){
+        int length = i;
+        while(!parseTokenList.get(i).getText().equals("end")
+                &&!parseTokenList.get(i).getText().equals("end.")
+                && length < parseTokenList.size()){
             currentBlockOperator(nextToken, showError);
+            length++;
         }
         switch(parseTokenList.get(i).getText()){
             case "end":{
